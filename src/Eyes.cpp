@@ -168,6 +168,8 @@ void GirlyEye::overwriteOpenRatio() {
         case Expression::Sleepy:
             open_ratio_ = 0.0f;
             break;
+        default:
+            break;
     }
 }
 
@@ -275,6 +277,8 @@ void PinkDemonEye::overwriteOpenRatio() {
 
         case Expression::Sleepy:
             open_ratio_ = 0.0f;
+            break;
+        default:
             break;
     }
 }

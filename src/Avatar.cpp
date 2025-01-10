@@ -3,6 +3,7 @@
 // license information.
 
 #include "Avatar.h"
+#include "freertos/task.h"
 
 #ifndef PI
 #define PI 3.1415926535897932384626433832795
@@ -69,7 +70,8 @@ TaskResult_t facialLoop(void *args) {
       horizontal = _rand() / (RAND_MAX / 2.0) - 1;
       avatar->setRightGaze(vertical, horizontal);
       avatar->setLeftGaze(vertical, horizontal);
-      saccade_interval = 500 + 100 * random(20);
+      //saccade_interval = 500 + 100 * random(20);
+      saccade_interval = 500 + 100 * random();
       last_saccade_millis = lgfx::millis();
     }
 
@@ -77,10 +79,12 @@ TaskResult_t facialLoop(void *args) {
       if ((lgfx::millis() - last_blink_millis) > blink_interval) {
         if (eye_open) {
           avatar->setEyeOpenRatio(1.0f);
-          blink_interval = 2500 + 100 * random(20);
+          //blink_interval = 2500 + 100 * random(20);
+          blink_interval = 2500 + 100 * random();
         } else {
           avatar->setEyeOpenRatio(0.0f);
-          blink_interval = 300 + 10 * random(20);
+          //blink_interval = 300 + 10 * random(20);
+          blink_interval = 300 + 10 * random();
         }
         eye_open = !eye_open;
         last_blink_millis = lgfx::millis();
@@ -102,12 +106,12 @@ Avatar::Avatar(Face *face)
       _isDrawing{false},
       expression{Expression::Neutral},
       breath{0},
-      leftEyeOpenRatio_{1.0f},
-      leftGazeH_{1.0f},
-      leftGazeV_{1.0f},
       rightEyeOpenRatio_{1.0f},
-      rightGazeH_{1.0f},
       rightGazeV_{1.0f},
+      rightGazeH_{1.0f},
+      leftEyeOpenRatio_{1.0f},
+      leftGazeV_{1.0f},
+      leftGazeH_{1.0f},
       isAutoBlink_{true},
       mouthOpenRatio{0},
       rotation{0},
@@ -136,6 +140,7 @@ void Avatar::addTask(TaskFunction_t f, const char *name,
   }
 #else
   // TODO(meganetaaan): set a task handler
+#if 0
   xTaskCreateUniversal(f,           /* Function to implement the task */
                        name,        /* Name of the task */
                        stack_size,  /* Stack size in words */
@@ -143,6 +148,14 @@ void Avatar::addTask(TaskFunction_t f, const char *name,
                        priority,    /* Priority of the task */
                        task_handle, /* Task handle. */
                        core_id);    /* Core No*/
+#endif
+  xTaskCreate(f,           /* Function to implement the task */
+                       name,        /* Name of the task */
+                       stack_size,  /* Stack size in words */
+                       ctx,         /* Task input parameter */
+                       priority,    /* Priority of the task */
+                       task_handle /* Task handle. */
+                       );
 #endif
 }
 
@@ -178,6 +191,7 @@ void Avatar::start(int colorDepth) {
   SDL_CreateThreadWithStackSize(facialLoop, "facialLoop", 1024, ctx);
 #else
   // TODO(meganetaaan): keep handle of these tasks
+#if 0
   xTaskCreateUniversal(drawLoop,        /* Function to implement the task */
                        "drawLoop",      /* Name of the task */
                        2048,            /* Stack size in words */
@@ -193,6 +207,22 @@ void Avatar::start(int colorDepth) {
                        2,            /* Priority of the task */
                        NULL,         /* Task handle. */
                        APP_CPU_NUM);
+#endif
+  xTaskCreate(drawLoop,        /* Function to implement the task */
+                       "drawLoop",      /* Name of the task */
+                       2048,            /* Stack size in words */
+                       ctx,             /* Task input parameter */
+                       1,               /* Priority of the task */
+                       &drawTaskHandle /* Task handle. */
+                       );
+
+  xTaskCreate(facialLoop,   /* Function to implement the task */
+                       "facialLoop", /* Name of the task */
+                       1024,         /* Stack size in words */
+                       ctx,          /* Task input parameter */
+                       2,            /* Priority of the task */
+                       NULL         /* Task handle. */
+                       );
 #endif
 }
 
