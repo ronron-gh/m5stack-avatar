@@ -71,7 +71,7 @@ TaskResult_t facialLoop(void *args) {
       avatar->setRightGaze(vertical, horizontal);
       avatar->setLeftGaze(vertical, horizontal);
       //saccade_interval = 500 + 100 * random(20);
-      saccade_interval = 500 + 100 * random();
+      saccade_interval = 500 + 100 * (random() % 20);
       last_saccade_millis = lgfx::millis();
     }
 
@@ -80,11 +80,11 @@ TaskResult_t facialLoop(void *args) {
         if (eye_open) {
           avatar->setEyeOpenRatio(1.0f);
           //blink_interval = 2500 + 100 * random(20);
-          blink_interval = 2500 + 100 * random();
+          blink_interval = 2500 + 100 * (random() % 20);
         } else {
           avatar->setEyeOpenRatio(0.0f);
           //blink_interval = 300 + 10 * random(20);
-          blink_interval = 300 + 10 * random();
+          blink_interval = 300 + 10 * (random() % 20);
         }
         eye_open = !eye_open;
         last_blink_millis = lgfx::millis();
